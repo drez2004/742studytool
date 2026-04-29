@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)file:///C:/Users/resen/Downloads/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Windows Server &amp; AD Study Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./study742_files/css2" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;
+  --surface:#0d1117;
+  --card:#141c2b;
+  --card2:#1a2236;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.14);
+  --text:#dde4f0;
+  --muted:#6b7a99;
+  --accent:#22d3ee;
+  --accent-dim:rgba(34,211,238,0.12);
+  --accent-border:rgba(34,211,238,0.35);
+  --green:#4ade80;
+  --green-dim:rgba(74,222,128,0.12);
+  --green-border:rgba(74,222,128,0.4);
+  --red:#f87171;
+  --red-dim:rgba(248,113,113,0.12);
+  --red-border:rgba(248,113,113,0.4);
+  --yellow:#fbbf24;
+  --yellow-dim:rgba(251,191,36,0.12);
+  --radius:10px;
+  --radius-lg:16px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%;}
+
+/* HEADER */
+.app-header{padding:0.85rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;background:rgba(6,8,15,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:100}
+.app-title{font-family:'Syne',system-ui,sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.04em;color:var(--text)}
+.app-title span{color:var(--accent)}
+.mode-tabs{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:var(--radius);border:1px solid var(--border)}
+.mode-tab{padding:6px 18px;border-radius:7px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;font-weight:500;transition:all 0.18s;-webkit-tap-highlight-color:transparent;}
+.mode-tab.active{background:var(--card2);color:var(--text)}
+.mode-tab:hover:not(.active){color:var(--text)}
+
+/* MAIN LAYOUT */
+.main{max-width:760px;margin:0 auto;padding:1.25rem 1rem}
+
+/* CATEGORY FILTER */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+.filter-chip{padding:7px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.filter-chip:hover{color:var(--text);border-color:var(--border2)}
+.filter-chip.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border)}
+
+/* ====================== FLASHCARD MODE ====================== */
+#fc-mode{}
+.fc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.fc-stats{font-size:13px;color:var(--muted);display:flex;gap:16px}
+.fc-stat{display:flex;align-items:center;gap:5px}
+.fc-stat .dot{width:8px;height:8px;border-radius:50%}
+.fc-controls{display:flex;gap:8px}
+.icon-btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.icon-btn:hover{color:var(--text);border-color:var(--border2)}
+.icon-btn.active{background:var(--yellow-dim);color:var(--yellow);border-color:rgba(251,191,36,0.35)}
+
+.fc-progress-wrap{background:var(--surface);border-radius:3px;height:3px;margin-bottom:2rem;overflow:hidden}
+.fc-progress-bar{height:3px;border-radius:3px;background:var(--accent);transition:width 0.3s}
+
+/* CARD FLIP */
+.card-scene{width:100%;perspective:1000px;margin-bottom:1.5rem;height:300px;}
+.card-inner{width:100%;height:300px;position:relative;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);-webkit-transition:-webkit-transform 0.55s cubic-bezier(0.4,0,0.2,1);cursor:pointer;}
+.card-inner.flipped{transform:rotateY(180deg);-webkit-transform:rotateY(180deg);}
+.card-face{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;padding:1.5rem;overflow-y:auto;}
+.card-face.back{transform:rotateY(180deg);-webkit-transform:rotateY(180deg);border-color:var(--green-border);background:linear-gradient(135deg,var(--card) 0%,rgba(74,222,128,0.04) 100%)}
+.card-cat{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;font-family:'Syne',system-ui,sans-serif}
+.card-q{font-size:16px;font-weight:500;line-height:1.55;color:var(--text);flex:1;display:flex;align-items:center}
+.card-counter{font-size:13px;color:var(--muted);margin-top:1rem;display:flex;justify-content:space-between;align-items:center}
+.card-hint{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.card-hint svg{opacity:0.5}
+
+.card-ans-label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;font-family:'Syne',system-ui,sans-serif}
+.card-ans{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.ans-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--green-dim);border-radius:var(--radius);border:1px solid var(--green-border)}
+.ans-letter{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--green);min-width:22px}
+.ans-text{font-size:14px;color:var(--text);line-height:1.45}
+
+/* NAVIGATION */
+.fc-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.nav-btn{padding:12px 20px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;font-size:14px;font-weight:500;transition:all 0.15s;font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.nav-btn:hover{background:var(--card);border-color:var(--border2)}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed}
+.nav-counter{font-size:14px;color:var(--muted);font-weight:500}
+
+/* MASTERY BUTTONS */
+.mastery-row{display:flex;gap:10px}
+.mastery-btn{flex:1;padding:14px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;cursor:pointer;font-size:14px;font-weight:500;transition:all 0.18s;font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.mastery-btn.know{color:var(--green);border-color:var(--green-border)}
+.mastery-btn.know:hover{background:var(--green-dim)}
+.mastery-btn.learning{color:var(--red);border-color:var(--red-border)}
+.mastery-btn.learning:hover{background:var(--red-dim)}
+
+.kbd-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:1rem}
+.kbd{display:inline-block;padding:1px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);font-size:11px;font-family:monospace}
+
+
+/* ====================== QUIZ MODE ====================== */
+#quiz-mode{display:none}
+.quiz-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem}
+.q-badge{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:3px 10px;border-radius:20px;font-family:'Syne',system-ui,sans-serif;white-space:nowrap}
+.q-progress-wrap{flex:1;background:var(--surface);border-radius:3px;height:3px}
+.q-progress-bar{height:3px;border-radius:3px;background:var(--accent);transition:width 0.3s}
+.q-counter{font-size:13px;color:var(--muted);white-space:nowrap}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.q-text{font-size:15px;font-weight:500;line-height:1.55;margin-bottom:1rem;color:var(--text)}
+.multi-label{font-size:12px;color:var(--yellow);margin-bottom:1rem;display:flex;align-items:center;gap:5px}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;background:transparent;text-align:left;width:100%;transition:all 0.12s;font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.opt:hover:not(:disabled){background:var(--card2);border-color:var(--border2)}
+.opt.selected{border-color:var(--accent-border);background:var(--accent-dim)}
+.opt.correct{border-color:var(--green-border);background:var(--green-dim)}
+.opt.wrong{border-color:var(--red-border);background:var(--red-dim)}
+.opt.show-correct{border-color:var(--green-border);background:var(--green-dim)}
+.opt:disabled{cursor:default}
+.opt-lbl{font-family:'Syne',system-ui,sans-serif;font-weight:700;font-size:12px;color:var(--muted);min-width:20px;padding-top:1px}
+.opt.selected .opt-lbl{color:var(--accent)}
+.opt.correct .opt-lbl,.opt.show-correct .opt-lbl{color:var(--green)}
+.opt.wrong .opt-lbl{color:var(--red)}
+.opt-text{font-size:14px;color:var(--text);line-height:1.45}
+
+.quiz-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.feedback-box{flex:1;font-size:13px;padding:9px 14px;border-radius:var(--radius);display:none;min-width:0;}
+.feedback-box.correct{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.feedback-box.wrong{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.action-btn{padding:12px 22px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--card2);color:var(--text);cursor:pointer;font-size:14px;font-weight:500;white-space:nowrap;font-family:'DM Sans',system-ui,sans-serif;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
+.action-btn:hover{background:var(--card);border-color:var(--border2)}
+.action-btn.primary{background:var(--accent);color:#06080f;border-color:var(--accent)}
+.action-btn.primary:hover{opacity:0.88}
+
+/* SCORE SCREEN */
+#score-screen{display:none}
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem;text-align:center;margin-bottom:1.5rem}
+.score-ring{width:120px;height:120px;border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;position:relative}
+.score-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.score-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--text)}
+.score-pct{font-size:14px;color:var(--muted);margin-top:4px}
+.score-label{font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px;font-family:'Syne',sans-serif}
+.score-sub{font-size:14px;color:var(--muted);margin-bottom:1.75rem}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.75rem;text-align:left}
+@media(max-width:400px){.cat-grid{grid-template-columns:1fr;}}
+.cat-item{background:var(--surface);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border)}
+.cat-name{font-size:12px;color:var(--muted);margin-bottom:4px}
+.cat-val{font-size:18px;font-weight:600;font-family:'Syne',sans-serif}
+.cat-bar-wrap{background:var(--border);border-radius:2px;height:3px;margin-top:6px}
+.cat-bar{height:3px;border-radius:2px;background:var(--accent)}
+.score-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+/* REVIEW */
+#review-panel{display:none;margin-top:1.5rem}
+.review-filter{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.rev-chip{padding:7px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;font-family:'DM Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.rev-chip.active{background:var(--card2);color:var(--text);border-color:var(--border2)}
+.review-items{display:flex;flex-direction:column;gap:10px}
+.rev-item{background:var(--card);border-radius:var(--radius);padding:14px 16px;border-left:3px solid transparent}
+.rev-item.r-correct{border-left-color:var(--green)}
+.rev-item.r-wrong{border-left-color:var(--red)}
+.rev-q{font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.5}
+.rev-meta{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.rev-meta .ca{color:var(--green)}
+.rev-meta .wa{color:var(--red)}
+.rev-cat{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+
+/* MISC */
+.hidden{display:none!important}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:480px){
+  .app-header{padding:0.7rem 0.85rem;}
+  .main{padding:1rem 0.85rem;}
+  .card-scene,.card-inner{height:320px;}
+  .card-face{padding:1.25rem;}
+  .card-q{font-size:14px;}
+  .fc-top{flex-wrap:wrap;gap:8px;}
+  .score-ring{width:100px;height:100px;}
+  .score-ring svg{width:100px;height:100px;}
+  .score-num{font-size:26px;}
+  .kbd-hint{display:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">WinServer &amp; <span>AD</span> Study Tool</div>
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="switchMode(&#39;fc&#39;)">Flashcards</button>
+    <button class="mode-tab" onclick="switchMode(&#39;quiz&#39;)">Quiz</button>
+  </div>
+</header>
+
+<!-- ====== FLASHCARD MODE ====== -->
+<div class="main" id="fc-mode" style="display: block;">
+  <div class="filter-row" id="fc-filter-row">
+    <button class="filter-chip active" onclick="setFcFilter(-1,this)">All 51</button>
+    <button class="filter-chip" onclick="setFcFilter(0,this)">AD Fundamentals</button>
+    <button class="filter-chip" onclick="setFcFilter(1,this)">Users &amp; Objects</button>
+    <button class="filter-chip" onclick="setFcFilter(2,this)">OUs &amp; Groups</button>
+    <button class="filter-chip" onclick="setFcFilter(3,this)">Auth &amp; Accounts</button>
+  </div>
+
+  <div class="fc-top">
+    <div class="fc-stats">
+      <div class="fc-stat"><div class="dot" style="background:var(--green)"></div><span id="fc-known-count">0</span> known</div>
+      <div class="fc-stat"><div class="dot" style="background:var(--red)"></div><span id="fc-learning-count">1</span> learning</div>
+    </div>
+    <div class="fc-controls">
+      <button class="icon-btn" id="shuffle-btn" onclick="toggleShuffle()">⇄ Shuffle</button>
+      <button class="icon-btn" onclick="resetMastery()">Reset</button>
+    </div>
+  </div>
+
+  <div class="fc-progress-wrap"><div class="fc-progress-bar" id="fc-pbar" style="width: 1.96078%;"></div></div>
+
+  <div class="card-scene" onclick="flipCard()">
+    <div class="card-inner" id="card-inner">
+      <div class="card-face front" id="card-front">
+        <div class="card-cat" id="fc-cat">Active Directory Fundamentals</div>
+        <div class="card-q" id="fc-q">Which of the following terms is defined by 'the process of verifying a user's identity'?</div>
+        <div class="card-counter">
+          <span id="fc-counter">1 / 51</span>
+          <span class="card-hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 9a3 3 0 1 1 6 0c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>
+            Click to reveal
+          </span>
+        </div>
+      </div>
+      <div class="card-face back" id="card-back">
+        <div class="card-ans-label">✓ Correct Answer</div>
+        <div class="card-ans" id="fc-ans"><div class="ans-item"><span class="ans-letter">B</span><span class="ans-text">Authentication</span></div></div>
+        <div class="card-counter">
+          <span id="fc-counter2">1 / 51</span>
+          <span class="card-hint">Click to flip back</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc-nav">
+    <button class="nav-btn" id="fc-prev" onclick="fcNav(-1)" disabled="">← Prev</button>
+    <span class="nav-counter" id="fc-nav-counter">1 / 51</span>
+    <button class="nav-btn" id="fc-next" onclick="fcNav(1)">Next →</button>
+  </div>
+
+  <div class="mastery-row">
+    <button class="mastery-btn know" onclick="markCard(true)">✓ Know it</button>
+    <button class="mastery-btn learning" onclick="markCard(false)">↺ Still learning</button>
+  </div>
+  <div class="kbd-hint"><kbd class="kbd">Space</kbd> flip &nbsp;&nbsp; <kbd class="kbd">←</kbd><kbd class="kbd">→</kbd> navigate &nbsp;&nbsp; <kbd class="kbd">K</kbd> know it &nbsp;&nbsp; <kbd class="kbd">L</kbd> still learning</div>
+</div>
+
+<!-- ====== QUIZ MODE ====== -->
+<div class="main" id="quiz-mode" style="display: none;">
+  <div id="quiz-active" style="display: block;">
+    <div class="filter-row" id="quiz-filter-row">
+      <button class="filter-chip active" onclick="setQuizFilter(-1,this)">All 51</button>
+      <button class="filter-chip" onclick="setQuizFilter(0,this)">AD Fundamentals</button>
+      <button class="filter-chip" onclick="setQuizFilter(1,this)">Users &amp; Objects</button>
+      <button class="filter-chip" onclick="setQuizFilter(2,this)">OUs &amp; Groups</button>
+      <button class="filter-chip" onclick="setQuizFilter(3,this)">Auth &amp; Accounts</button>
+    </div>
+
+    <div class="quiz-header">
+      <span class="q-badge" id="q-cat-badge">Active Directory Fundamentals</span>
+      <div class="q-progress-wrap"><div class="q-progress-bar" id="q-pbar" style="width: 0%;"></div></div>
+      <span class="q-counter" id="q-counter">1 / 51</span>
+    </div>
+
+    <div class="q-card">
+      <div class="q-text" id="q-text">Which of the following terms is defined by 'the process of verifying a user's identity'?</div>
+      <div class="multi-label" id="multi-hint" style="display:none">► Select all that apply</div>
+      <div class="options" id="options"><button class="opt"><span class="opt-lbl">A</span><span class="opt-text">Authorization</span></button><button class="opt"><span class="opt-lbl">B</span><span class="opt-text">Authentication</span></button><button class="opt"><span class="opt-lbl">C</span><span class="opt-text">Privilege verifying</span></button><button class="opt"><span class="opt-lbl">D</span><span class="opt-text">Identification</span></button></div>
+    </div>
+
+    <div class="quiz-actions">
+      <div class="feedback-box" id="feedback" style="display: none;"></div>
+      <button class="action-btn primary" id="action-btn" onclick="handleAction()">Check answer</button>
+    </div>
+  </div>
+
+  <div id="score-screen" style="display: none;">
+    <div class="score-card">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"></circle>
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" id="score-ring-circle" stroke-dasharray="339.29" stroke-dashoffset="339.29"></circle>
+        </svg>
+        <div><div class="score-num" id="score-num">0%</div></div>
+      </div>
+      <div class="score-label" id="score-label">Quiz complete</div>
+      <div class="score-sub" id="score-sub"></div>
+      <div class="cat-grid" id="cat-grid"></div>
+      <div class="score-btns">
+        <button class="action-btn" onclick="retakeQuiz()">Retake quiz</button>
+        <button class="action-btn" onclick="toggleReview()">Review answers</button>
+      </div>
+    </div>
+    <div id="review-panel">
+      <div class="review-filter">
+        <button class="rev-chip active" onclick="filterReview(&#39;all&#39;,this)">All</button>
+        <button class="rev-chip" onclick="filterReview(&#39;wrong&#39;,this)">Wrong only</button>
+        <button class="rev-chip" onclick="filterReview(&#39;correct&#39;,this)">Correct only</button>
+      </div>
+      <div class="review-items" id="review-items"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SAFE STORAGE (works on mobile file:// too) =====
+const safeStore = {
+  _mem: {},
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return this._mem[k]||null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ this._mem[k]=v; } },
+  remove(k){ try{ localStorage.removeItem(k); }catch(e){ delete this._mem[k]; } }
+};
+
+const CATS = ["Active Directory Fundamentals","Users, Computers & Objects","OUs, Groups & Delegation","Authentication & Accounts"];
+const LABELS = ["A","B","C","D"];
+
+const ALL_QS = [
+  {c:0,t:"Which of the following terms is defined by 'the process of verifying a user's identity'?",o:["Authorization","Authentication","Privilege verifying","Identification"],a:[1]},
+  {c:0,t:"Which of the following is the default trust relationship between domains in one forest?",o:["Two-way trust relationship between domain trees","By default, no trust relationship between domain trees","One-way trust relationship between domain trees","Each domain tree trusts the forest, but not between each other"],a:[0]},
+  {c:0,t:"Which of the following determines the functional level of an Active Directory forest?",o:["The number of domains within the forest","The functional level as specified in the Active Directory Users and Computers console","The lowest version of Windows Server on a domain controller","The number of domain controllers within each domain"],a:[2]},
+  {c:0,t:"Which of the following is an important difference between groups and organizational units (OUs)?",o:["An OU can represent the various divisions of your organization.","Group membership can be a subset of an OU.","OUs are a security entity.","Group memberships are independent of the domain's tree structure."],a:[3]},
+  {c:0,t:"Which of the following is the method for removing a domain controller in Windows Server 2016?",o:["Using the Dcpromo.exe command","Using the Add Roles and Features Wizard","Using the Adprep.exe command","Using the Remove Roles and Features Wizard"],a:[3]},
+  {c:0,t:"Which of the following is NOT an Operations Master (FSMO role)?",o:["Global catalog","PDC Emulator","Schema Master","RID Master"],a:[0]},
+  {c:0,t:"Which of the following should be used to transfer the holder of the RID Master?",o:["Active Directory Users and Computers","Active Directory Sites and Services","Active Directory Domains and Trusts","ADSI Edit"],a:[0]},
+  {c:0,t:"Which of the following should be used to transfer the holder of the Schema Master?",o:["Active Directory Users and Computers","Active Directory Sites and Services","Active Directory Domains and Trusts","Active Directory Schema snap-in"],a:[3]},
+  {c:0,t:"A client is creating a self-service kiosk at a local mall that needs to access a domain controller. Which of the following should be used?",o:["Global catalog","PDC Emulator","RODC","RID Master"],a:[2]},
+  {c:0,t:"Which of the following is the minimum forest functional level required to deploy an RODC?",o:["Windows Server 2003","Windows Server 2008","Windows Server 2008 R2","Windows Server 2012"],a:[0]},
+  {c:0,t:"An RODC is deployed to a branch office. Users need to log on to the domain using the RODC. Which action should be taken?",o:["Configure a bridgehead server in the main office pointing to the RODC.","Configure a Password Replication Policy on the RODC.","Enable the Password Authentication using RODC option for each user.","Add the users to the RODC Users Group."],a:[1]},
+  {c:1,t:"Which two user accounts are created by default in a Windows Server 2016 computer?",o:["Local Domain Admin and Guest","Guest and Domain Administrator","Administrator and Guest","System and Administrator"],a:[2]},
+  {c:1,t:"Which of the following tools is NOT efficient for creating multiple users and groups in bulk?",o:["Dsadd.exe used with batch files","CSVDE.exe used with .csv files","LDIFDE.exe","Active Directory Users and Computers console"],a:[3]},
+  {c:1,t:"Which of the following is the PowerShell cmdlet for creating a new user account?",o:["New-ADUser","New-User","New-SamAccountName","There is no PowerShell cmdlet for user creation."],a:[0]},
+  {c:1,t:"Which of the following is the correct PowerShell cmdlet for creating a new computer object?",o:["New-Computer -Name <name> -Path <dn>","New-ADComputer -Name <name> -Path <dn>","New-ComputerName <name> -Path <dn>","There is no PowerShell cmdlet for creating computer objects."],a:[1]},
+  {c:1,t:"May a non-administrator domain user create a computer object in Active Directory?",o:["Yes, indirectly — up to 10 computer objects if the user is authenticated to the domain.","No, a user must be an administrator or have object creation privileges.","Yes, users may create as many computer objects as needed.","No, a user can never create a computer object in Active Directory."],a:[0]},
+  {c:1,t:"Which of the following is the correct PowerShell cmdlet for disabling a user or computer account?",o:["Disable-ADAccount -Identity <account name>","Disable-ADIdentity -Account <account name>","Disable-ADUsrCtr -Identity <account name>","Disable-Identity -Account <account name>"],a:[0]},
+  {c:1,t:"When using Netdom.exe to join a computer without the /OU:OUDN parameter, where is the object placed?",o:["In the same OU as the administrator running Netdom.exe","In the Users container","In the Computers container","The command fails without the OU specified."],a:[2]},
+  {c:1,t:"Who may join a computer to the domain?",o:["No one; the computer does this itself when authenticating.","The computer joins as part of the object creation process.","Only the domain administrator may join the computer.","Members of the computer's local Administrators group may join the computer."],a:[3]},
+  {c:1,t:"The LDIFDE.exe utility is most similar to which other utility?",o:["Microsoft Excel","Active Directory Administrative Center (ADAC)","CSVDE.exe","Dsadd.exe"],a:[2]},
+  {c:1,t:"Which of the following is the primary benefit of using user templates?",o:["A time-saver when creating similar users with many shared attributes","A task saver for delegating user creation to other users","A quality assurance method for new objects","No benefits if the users are the same overall"],a:[0]},
+  {c:2,t:"All department heads want to manage their own containers but not others. Which Active Directory feature allows this?",o:["Delegation of Control Wizard","Read-only domain controller","Multimaster replication","SRV records"],a:[0]},
+  {c:2,t:"User Amy is in the sales OU of the central.cohowinery.com domain. Which is the correct distinguished name syntax?",o:["amy.cohowinery.com","cn=amy.ou=sales.dc=cohowinery.com","cn=amy,ou=sales,dc=central,dc=cohowinery,dc=com","dc=com,dn=cohowinery,ou=sales,cn=amy"],a:[2]},
+  {c:2,t:"Which of the following is a container object within Active Directory?",o:["Folder","Group","User","OU"],a:[3]},
+  {c:2,t:"Which group scope should be used to consolidate groups and accounts that span multiple domains or the entire forest?",o:["Global","Domain local","Built-in","Universal"],a:[3]},
+  {c:2,t:"Which of the following is NOT a correct reason for creating an OU?",o:["To create a permanent container that cannot be moved or renamed","To mirror the divisions in your organization","To delegate administration tasks","To assign different Group Policy settings to a specific group"],a:[0]},
+  {c:2,m:1,t:"Which of the following group scope conversions are NOT permitted? (Select all that apply)",o:["Global to Universal","Global to Domain Local","Universal to Global","Domain Local to Universal"],a:[1,2]},
+  {c:2,m:1,t:"At Windows Server 2016 domain functional level, which security principals can be members of a global group? (Select all that apply)",o:["Users","Computers","Universal groups","Global groups from the same domain"],a:[0,1,3]},
+  {c:2,m:1,t:"When attempting to delete a global security group, the operation fails. Which could be the causes? (Select all that apply)",o:["There are still members in the group.","One of the group's members has the group set as its primary group.","The user does not have proper permissions for the container.","Global groups cannot be deleted from the ADUC console."],a:[1,2]},
+  {c:2,t:"Which of the following is the minimum domain functional level required to use group membership expiration?",o:["Windows Server 2008 R2","Windows Server 2012","Windows Server 2012 R2","Windows Server 2016"],a:[2]},
+  {c:2,t:"Which of the following represents the complete path through the hierarchical tree structure to a specific object in Active Directory?",o:["Distinguished name","Relative name","Common name","Scope"],a:[0]},
+  {c:3,t:"Which act confirms the identity of a user or system?",o:["Authentication","Authorization","Auditing","Accounting"],a:[0]},
+  {c:3,t:"Which fallback authentication protocol is used when Kerberos does not work?",o:["SSL","SSH","MS-CHAPv2","NTLM"],a:[3]},
+  {c:3,t:"By default, what is the maximum clock difference allowed for Kerberos to work?",o:["60 seconds","90 seconds","300 seconds (5 minutes)","600 seconds"],a:[2]},
+  {c:3,t:"Which authentication protocol uses a Key Distribution Center (KDC) and is more secure than NTLM?",o:["SSL","Kerberos","MS-CHAPv2","NTLM"],a:[1]},
+  {c:3,t:"Which of the following is the correct SPN format for Kerberos?",o:["SQLService/service1:1433","service1:1433","service1:1433:SQLService","SQLService:1433/service1"],a:[0]},
+  {c:3,t:"Which name uniquely identifies an instance of a service running on a specific host for a client?",o:["TGT","KDC","ADSI","SPN"],a:[3]},
+  {c:3,t:"Which command-line tool should be used to configure an SPN for a user account?",o:["addspn","configspn","setspn","getspn"],a:[2]},
+  {c:3,t:"Which of the following allows a Kerberos ticket to be created for another service on the originating user's behalf?",o:["Kerberos delegation","SPM (Service Principal Manager)","Managed Service Accounts","Group Managed Service Accounts"],a:[0]},
+  {c:3,t:"By default, how often do passwords change for Managed Service Accounts (MSAs)?",o:["1 day","10 days","30 days","60 days"],a:[2]},
+  {c:3,t:"Which account type runs a service on multiple computers in a cluster and automatically manages password changes?",o:["Standard user account","Managed Service Account (MSA)","Group Managed Service Account (gMSA)","Computer account"],a:[2]},
+  {c:3,m:1,t:"Which of the following are located under Account Policies in Group Policy? (Select all that apply)",o:["Kerberos Policy","Folder Redirection","Password Policy","Account Lockout Policy"],a:[0,2,3]},
+  {c:3,t:"Which policy is used to determine the circumstances and length of time an account will be locked out?",o:["Kerberos policy","Folder Redirection","Password policy","Account Lockout policy"],a:[3]},
+  {c:3,t:"Which policy determines settings for passwords, including enforcement and lifetime?",o:["Kerberos policy","Folder Redirection","Password policy","Account Lockout policy"],a:[2]},
+  {c:3,t:"How many password policies can be defined per domain using standard Group Policy?",o:["1","2","4","Unlimited"],a:[0]},
+  {c:3,t:"Which of the following is the default value for 'Enforce password history' in a Windows domain?",o:["1 password","4 passwords","10 passwords","24 passwords"],a:[3]},
+  {c:3,t:"Which value for 'Account lockout duration' requires an administrator to manually unlock an account?",o:["0","1","24","999"],a:[0]},
+  {c:3,t:"Which of the following allows different password policies to be assigned to different sets of users in the same domain?",o:["Exception password policies","One-off password policies","Fine-grained password policies","User-defined password policies"],a:[2]},
+  {c:3,t:"Which tool should be used to configure a password policy on a stand-alone Windows computer?",o:["secpol.msc","password.msc","gpupdate.exe","ntdsutil.exe"],a:[0]},
+  {c:3,t:"What is the minimum domain functional level required to use fine-grained password policies?",o:["Windows Server 2003","Windows Server 2008","Windows Server 2008 R2","Windows Server 2012"],a:[1]},
+  {c:3,t:"On which Group Policy Object is the domain password policy normally configured?",o:["Default Domain Policy","Domain Controller Policy","Default Password Policy","PSO Policy"],a:[0]}
+];
+
+// ===== FLASHCARD STATE =====
+let fcFilter = -1;
+let fcDeck = [...ALL_QS.map((q,i)=>i)];
+let fcIndex = 0;
+let fcFlipped = false;
+let fcShuffle = false;
+let fcMastery = {}; // index -> true (known) / false (learning)
+try { const s=safeStore.get('fc_mastery'); if(s) fcMastery=JSON.parse(s); } catch(e){}
+
+function getFilteredDeck(){
+  return ALL_QS.map((q,i)=>i).filter(i => fcFilter === -1 || ALL_QS[i].c === fcFilter);
+}
+
+function setFcFilter(cat, el){
+  fcFilter = cat;
+  document.querySelectorAll('#fc-filter-row .filter-chip').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  rebuildDeck();
+}
+
+function rebuildDeck(){
+  fcDeck = getFilteredDeck();
+  if(fcShuffle) shuffle(fcDeck);
+  fcIndex = 0;
+  fcFlipped = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+  renderCard();
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+function toggleShuffle(){
+  fcShuffle = !fcShuffle;
+  const btn = document.getElementById('shuffle-btn');
+  btn.classList.toggle('active', fcShuffle);
+  rebuildDeck();
+}
+
+function renderCard(){
+  if(!fcDeck.length) return;
+  const qi = fcDeck[fcIndex];
+  const q = ALL_QS[qi];
+  document.getElementById('fc-cat').textContent = CATS[q.c];
+  document.getElementById('fc-q').textContent = q.t;
+  const counter = (fcIndex+1)+' / '+fcDeck.length;
+  document.getElementById('fc-counter').textContent = counter;
+  document.getElementById('fc-counter2').textContent = counter;
+  document.getElementById('fc-nav-counter').textContent = counter;
+  document.getElementById('fc-pbar').style.width = ((fcIndex+1)/fcDeck.length*100)+'%';
+  document.getElementById('fc-prev').disabled = fcIndex === 0;
+  document.getElementById('fc-next').disabled = fcIndex === fcDeck.length-1;
+  // render answer
+  const ansDiv = document.getElementById('fc-ans');
+  ansDiv.innerHTML = q.a.map(ai=>`<div class="ans-item"><span class="ans-letter">${LABELS[ai]}</span><span class="ans-text">${q.o[ai]}</span></div>`).join('');
+  updateMasteryStats();
+}
+
+function flipCard(){
+  fcFlipped = !fcFlipped;
+  document.getElementById('card-inner').classList.toggle('flipped', fcFlipped);
+}
+
+function fcNav(dir){
+  fcIndex = Math.max(0, Math.min(fcDeck.length-1, fcIndex+dir));
+  fcFlipped = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+  renderCard();
+}
+
+function markCard(known){
+  const qi = fcDeck[fcIndex];
+  fcMastery[qi] = known;
+  try { safeStore.set('fc_mastery', JSON.stringify(fcMastery)); } catch(e){}
+  updateMasteryStats();
+  // auto advance
+  setTimeout(()=>{
+    if(fcIndex < fcDeck.length-1){ fcNav(1); }
+  }, 300);
+}
+
+function updateMasteryStats(){
+  const deck = getFilteredDeck();
+  let known=0, learning=0;
+  deck.forEach(i=>{ if(fcMastery[i]===true) known++; else if(fcMastery[i]===false) learning++; });
+  document.getElementById('fc-known-count').textContent = known;
+  document.getElementById('fc-learning-count').textContent = learning;
+}
+
+function resetMastery(){
+  if(confirm('Reset all mastery tracking?')){
+    fcMastery = {};
+    try { safeStore.remove('fc_mastery'); } catch(e){}
+    updateMasteryStats();
+  }
+}
+
+// ===== QUIZ STATE =====
+let quizFilter = -1;
+let quizDeck = [];
+let qIndex = 0;
+let qSelected = [];
+let qAnswered = false;
+let qResults = [];
+
+function setQuizFilter(cat, el){
+  quizFilter = cat;
+  document.querySelectorAll('#quiz-filter-row .filter-chip').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  startQuiz();
+}
+
+function startQuiz(){
+  quizDeck = ALL_QS.map((q,i)=>i).filter(i => quizFilter===-1 || ALL_QS[i].c===quizFilter);
+  qIndex=0; qSelected=[]; qAnswered=false; qResults=[];
+  document.getElementById('quiz-active').style.display='block';
+  document.getElementById('score-screen').style.display='none';
+  renderQ();
+}
+
+function renderQ(){
+  if(!quizDeck.length) return;
+  const qi = quizDeck[qIndex];
+  const q = ALL_QS[qi];
+  document.getElementById('q-cat-badge').textContent = CATS[q.c];
+  document.getElementById('q-pbar').style.width = ((qIndex)/quizDeck.length*100)+'%';
+  document.getElementById('q-counter').textContent = (qIndex+1)+' / '+quizDeck.length;
+  document.getElementById('q-text').textContent = q.t;
+  document.getElementById('multi-hint').style.display = q.m ? 'flex' : 'none';
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('action-btn').textContent = 'Check answer';
+  document.getElementById('action-btn').className = 'action-btn primary';
+  qSelected=[]; qAnswered=false;
+  const opts = document.getElementById('options');
+  opts.innerHTML='';
+  q.o.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="opt-lbl">${LABELS[i]}</span><span class="opt-text">${o}</span>`;
+    btn.onclick=()=>selectOpt(i);
+    opts.appendChild(btn);
+  });
+}
+
+function selectOpt(i){
+  if(qAnswered) return;
+  const q = ALL_QS[quizDeck[qIndex]];
+  if(q.m){
+    if(qSelected.includes(i)) qSelected=qSelected.filter(x=>x!==i);
+    else qSelected.push(i);
+  } else {
+    qSelected=[i];
+  }
+  Array.from(document.getElementById('options').children).forEach((b,idx)=>{
+    b.className='opt'+(qSelected.includes(idx)?' selected':'');
+  });
+}
+
+function handleAction(){
+  if(qAnswered){
+    qIndex++;
+    if(qIndex>=quizDeck.length){ showScore(); return; }
+    renderQ(); return;
+  }
+  if(!qSelected.length) return;
+  qAnswered=true;
+  const qi=quizDeck[qIndex];
+  const q=ALL_QS[qi];
+  const correct=arrEq(qSelected.slice().sort((a,b)=>a-b), q.a.slice().sort((a,b)=>a-b));
+  qResults.push({qi, correct, selected:qSelected.slice()});
+  Array.from(document.getElementById('options').children).forEach((b,i)=>{
+    const sel=qSelected.includes(i), cor=q.a.includes(i);
+    if(sel&&cor) b.className='opt correct';
+    else if(sel&&!cor) b.className='opt wrong';
+    else if(!sel&&cor) b.className='opt show-correct';
+    else b.className='opt';
+    b.disabled=true;
+  });
+  const fb=document.getElementById('feedback');
+  fb.style.display='block';
+  fb.className='feedback-box '+(correct?'correct':'wrong');
+  fb.textContent=correct?'Correct!' : 'Incorrect. Correct: '+q.a.map(i=>LABELS[i]+'. '+q.o[i]).join(' | ');
+  document.getElementById('action-btn').textContent = qIndex<quizDeck.length-1?'Next →':'Finish';
+  document.getElementById('action-btn').className='action-btn';
+}
+
+function arrEq(a,b){ return a.length===b.length&&a.every((v,i)=>v===b[i]); }
+
+function showScore(){
+  document.getElementById('quiz-active').style.display='none';
+  document.getElementById('score-screen').style.display='block';
+  const total=qResults.filter(r=>r.correct).length;
+  const pct=Math.round(total/qResults.length*100);
+  document.getElementById('score-num').textContent=pct+'%';
+  const circumference=2*Math.PI*54;
+  const offset=circumference*(1-pct/100);
+  const circle=document.getElementById('score-ring-circle');
+  circle.style.strokeDashoffset=offset;
+  circle.style.stroke=pct>=80?'#4ade80':pct>=60?'#fbbf24':'#f87171';
+  const labels=['Amazing work!','Great job!','Good effort!','Keep studying!'];
+  document.getElementById('score-label').textContent=pct>=90?labels[0]:pct>=70?labels[1]:pct>=50?labels[2]:labels[3];
+  document.getElementById('score-sub').textContent=total+' of '+qResults.length+' correct';
+  const catStats={};
+  CATS.forEach((c,i)=>{ catStats[i]={name:c,correct:0,total:0}; });
+  qResults.forEach(r=>{ const q=ALL_QS[r.qi]; catStats[q.c].total++; if(r.correct)catStats[q.c].correct++; });
+  const cg=document.getElementById('cat-grid');
+  cg.innerHTML=Object.values(catStats).filter(s=>s.total>0).map(s=>{
+    const p=s.total?Math.round(s.correct/s.total*100):0;
+    return `<div class="cat-item"><div class="cat-name">${s.name}</div><div class="cat-val">${s.correct}/${s.total}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${p}%;background:${p>=80?'var(--green)':p>=60?'var(--yellow)':'var(--red)'}"></div></div></div>`;
+  }).join('');
+}
+
+function retakeQuiz(){
+  document.getElementById('review-panel').style.display='none';
+  startQuiz();
+}
+
+function toggleReview(){
+  const rp=document.getElementById('review-panel');
+  if(rp.style.display==='none'||!rp.style.display){
+    rp.style.display='block';
+    filterReview('all', document.querySelector('.rev-chip'));
+  } else {
+    rp.style.display='none';
+  }
+}
+
+function filterReview(type, el){
+  document.querySelectorAll('.rev-chip').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const items=qResults.filter(r=>type==='all'?true:type==='wrong'?!r.correct:r.correct);
+  document.getElementById('review-items').innerHTML=items.map(r=>{
+    const q=ALL_QS[r.qi];
+    const selText=r.selected.map(i=>LABELS[i]+'. '+q.o[i]).join(', ');
+    const corrText=q.a.map(i=>LABELS[i]+'. '+q.o[i]).join(', ');
+    return `<div class="rev-item r-${r.correct?'correct':'wrong'}">
+      <div class="rev-cat">${CATS[q.c]}</div>
+      <div class="rev-q">${q.t}</div>
+      <div class="rev-meta">
+        <span>Your answer: <span class="${r.correct?'ca':'wa'}">${selText}</span></span>
+        ${!r.correct?`<span>Correct answer: <span class="ca">${corrText}</span></span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== MODE SWITCH =====
+function switchMode(mode){
+  document.querySelectorAll('.mode-tab').forEach((t,i)=>t.classList.toggle('active',['fc','quiz'][i]===mode));
+  document.getElementById('fc-mode').style.display = mode==='fc'?'block':'none';
+  document.getElementById('quiz-mode').style.display = mode==='quiz'?'block':'none';
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('fc-mode').style.display==='none') return;
+  if(e.code==='Space'){ e.preventDefault(); flipCard(); }
+  else if(e.code==='ArrowLeft') fcNav(-1);
+  else if(e.code==='ArrowRight') fcNav(1);
+  else if(e.key.toLowerCase()==='k') markCard(true);
+  else if(e.key.toLowerCase()==='l') markCard(false);
+});
+
+// ===== INIT =====
+rebuildDeck();
+startQuiz();
+switchMode('fc');
+</script>
+
+
+</body></html>
